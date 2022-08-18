@@ -66,4 +66,4 @@ def get_video():
 def writing_json():
     data = get_video()
     with open(f'gs://{os.environ.get("bucket")}/raw_youtube_data.json', 'w', encoding='utf-8') as file:
-    json.dump(data, file, ensure_ascii=False, indent=4)
+        json.dump(data, file, ensure_ascii=False, indent=4)
