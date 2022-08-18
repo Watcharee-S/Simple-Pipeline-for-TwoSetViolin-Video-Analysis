@@ -62,10 +62,8 @@ def get_video():
             all_video.append(response['items'][i])
     return all_video
 
-## writing json file
+## writing json file to gcs
 def writing_json():
     data = get_video()
-    with open('raw_youtube_data.json', 'w', encoding='utf-8') as f:
-    json.dump(data, f, ensure_ascii=False, indent=4)
-
-## writing file to gcs
+    with open(f'gs://{os.environ.get("bucket")}/raw_youtube_data.json', 'w', encoding='utf-8') as file:
+    json.dump(data, file, ensure_ascii=False, indent=4)
