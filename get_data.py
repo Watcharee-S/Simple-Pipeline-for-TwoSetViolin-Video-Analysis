@@ -2,7 +2,6 @@ from googleapiclient.discovery import build
 import base64
 import os
 import json
-from google.cloud import cloudstorage as gcs
 
 ## create youtube api connection
 def get_youtube():
@@ -13,7 +12,7 @@ def get_youtube():
     return youtube
 
 ## get upload playlist id
-def get_channel_upload_id():
+def get_channel_upload_id(youtube):
     channel_id = os.environ.get("channel_id")
     request = youtube.channels().list(
                 part="snippet,contentDetails,statistics",
@@ -25,7 +24,7 @@ def get_channel_upload_id():
     return channel_upload_id
 
 ## get all upload videos id
-def get_video_id(channel_upload_id):    
+def get_video_id(youtube, channel_upload_id):    
     video_ids = []
     more_pages = True
     page_token = ''
@@ -50,8 +49,8 @@ def get_video_id(channel_upload_id):
 ## get data of videos
 def get_video():
     youtube = get_youtube()
-    channel_upload_id = get_channel_upload_id()
-    video_ids = get_video_id(channel_upload_id)
+    channel_upload_id = get_channel_upload_id(youtube)
+    video_ids = get_video_id(youtube, channel_upload_id)
     all_video = []
     for i in range(0, len(video_ids), 50):
         request = youtube.videos().list(
@@ -63,7 +62,7 @@ def get_video():
     return all_video
 
 ## writing json file to gcs
-def writing_json():
+def writing_json(event, context):
     data = get_video()
     with open(f'gs://{os.environ.get("bucket")}/raw_youtube_data.json', 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
