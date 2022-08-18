@@ -1,4 +1,5 @@
 from googleapiclient.discovery import build
+from google.cloud import storage
 import base64
 import os
 import json
@@ -62,7 +63,15 @@ def get_video():
     return all_video
 
 ## writing json file to gcs
-def writing_json(event, context):
+def json_write(event, context):
     data = get_video()
-    with open(f'gs://{os.environ.get("bucket")}/raw_youtube_data.json', 'w', encoding='utf-8') as file:
-        json.dump(data, file, ensure_ascii=False, indent=4)
+
+    bucket_name = os.environ.get("bucket_name")
+    destination_blob_name = os.environ.get("destination_name")
+    contents = json.dumps(data, ensure_ascii=False)
+
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+
+    blob.upload_from_string(contents)
