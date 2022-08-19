@@ -63,7 +63,7 @@ def get_video():
     return all_video
 
 ## writing json file to gcs
-def json_write(event, context):
+def json_write():
     data = get_video()
 
     bucket_name = os.environ.get("bucket_name")
@@ -75,3 +75,21 @@ def json_write(event, context):
     blob = bucket.blob(destination_blob_name)
 
     blob.upload_from_string(contents)
+
+def hello_world(request):
+    """Responds to any HTTP request.
+    Args:
+        request (flask.Request): HTTP request object.
+    Returns:
+        The response text or any set of values that can be turned into a
+        Response object using
+        `make_response <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>`.
+    """
+    request_json = request.get_json()
+    if request.args and 'message' in request.args:
+        return request.args.get('message')
+    elif request_json and 'message' in request_json:
+        return request_json['message']
+    else:
+        json_write()
+        return f'Upload Success!'
