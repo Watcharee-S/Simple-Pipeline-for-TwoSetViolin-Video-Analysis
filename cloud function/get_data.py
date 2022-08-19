@@ -3,6 +3,7 @@ from google.cloud import storage
 import base64
 import os
 import json
+import pandas as pd
 
 ## create youtube api connection
 def get_youtube():
@@ -62,19 +63,42 @@ def get_video():
             all_video.append(response['items'][i])
     return all_video
 
+def to_csv(data):
+    video_data = []
+    for i in range(len(data)):
+        video_df = {}
+        video_df['publish'] = data[i]['snippet']['publishedAt']
+        video_df['title'] = data[i]['snippet']['title']
+        if 'defaultLanguage' not in data[i]['snippet'].keys():
+            video_df['language'] = None
+        else:
+            video_df['language'] = data[i]['snippet']['defaultLanguage']
+        video_df['category'] = data[i]['snippet']['categoryId']
+        video_df['view'] = data[i]['statistics']['viewCount']
+        video_df['like'] = data[i]['statistics']['likeCount']
+        if 'commentCount' not in data[i]['statistics'].keys():
+            video_df['comments'] = None
+        else:
+            video_df['comments'] = data[i]['statistics']['commentCount']
+        video_data.append(video_df)
+        
+    df = pd.DataFrame(video_data)
+    return df
+
 ## writing json file to gcs
-def json_write():
+def write_data_to_gcs():
     data = get_video()
 
     bucket_name = os.environ.get("bucket_name")
-    destination_blob_name = os.environ.get("destination_name")
-    contents = json.dumps(data, ensure_ascii=False)
+    destination_blob_names = [os.environ.get("destination_json"), os.environ.get("destination_csv")]
+    contents = [json.dumps(data, ensure_ascii=False), to_csv(data)]
+    
+    for i in range(len(contents)):
+        storage_client = storage.Client()
+        bucket = storage_client.get_bucket(bucket_name)
+        blob = bucket.blob(destination_blob_names[i])
 
-    storage_client = storage.Client()
-    bucket = storage_client.get_bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
-
-    blob.upload_from_string(contents)
+        blob.upload_from_string(contents[i])
 
 def hello_world(request):
     """Responds to any HTTP request.
@@ -91,5 +115,5 @@ def hello_world(request):
     elif request_json and 'message' in request_json:
         return request_json['message']
     else:
-        json_write()
+        write_data_to_gcs()
         return f'Upload Success!'
