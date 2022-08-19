@@ -83,22 +83,35 @@ def to_csv(data):
         video_data.append(video_df)
         
     df = pd.DataFrame(video_data)
-    return df
+    df_str = df.to_csv(index = False)
+    return df_str
 
-## writing json file to gcs
-def write_data_to_gcs():
+## writing file to gcs
+def write_json_to_gcs():
     data = get_video()
 
     bucket_name = os.environ.get("bucket_name")
-    destination_blob_names = [os.environ.get("destination_json"), os.environ.get("destination_csv")]
-    contents = [json.dumps(data, ensure_ascii=False), to_csv(data)]
+    destination_blob_names = os.environ.get("destination_json")
+    contents = json.dumps(data, ensure_ascii=False)
     
-    for i in range(len(contents)):
-        storage_client = storage.Client()
-        bucket = storage_client.get_bucket(bucket_name)
-        blob = bucket.blob(destination_blob_names[i])
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(bucket_name)
+    blob = bucket.blob(destination_blob_names)
 
-        blob.upload_from_string(contents[i])
+    blob.upload_from_string(contents)
+
+def write_csv_to_gcs():
+    data = get_video()
+
+    bucket_name = os.environ.get("bucket_name")
+    destination_blob_names = os.environ.get("destination_csv")
+    contents = to_csv(data)
+    
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(bucket_name)
+    blob = bucket.blob(destination_blob_names)
+
+    blob.upload_from_string(contents, content_type='text/csv')
 
 def hello_world(request):
     """Responds to any HTTP request.
@@ -115,5 +128,6 @@ def hello_world(request):
     elif request_json and 'message' in request_json:
         return request_json['message']
     else:
-        write_data_to_gcs()
+        write_json_to_gcs()
+        write_csv_to_gcs()
         return f'Upload Success!'
