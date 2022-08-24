@@ -9,10 +9,11 @@ Building a simple pipeline to extract youtube video data from TwoSetViolin Chann
 ## Folder Structure
 In each folder contains code which needs to run with each google cloud products
 ## Steps
-    1. Create buckets to store raw and processed data and upload youtube_category file in raw bucket (console)
-    2. Deploy Cloud function to extract data using http as trigger (Web UI)
-    3. Create BigQuery Dataset (Web UI)
-    4. Create and Run Cloud Composer
+    1. Create buckets to store raw and processed data
+    2. Uploading youtube_category file and main pyspark file in raw bucket (console)
+    3. Deploy Cloud function to extract data using http as trigger (Web UI)
+    4. Create BigQuery Dataset (Web UI)
+    5. Create and Run Cloud Composer
 ## Reference
 - [TwoSetViolin Channel](https://youtube.com/c/twosetviolin)
 - [Youtube API Instruction](https://youtu.be/SwSbnmqk3zY)
