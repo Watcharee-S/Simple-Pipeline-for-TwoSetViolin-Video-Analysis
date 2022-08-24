@@ -11,8 +11,8 @@ from airflow.utils.trigger_rule import TriggerRule
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 import requests
 
-REGION = "us-central-1"
-ZONE = "us-central-a"
+REGION = "us-central1"
+ZONE = "us-central1-a"
 CLUSTER_NAME = "pyspark-simple-de"
 PROJECT_ID = Variable.get("project_id")
 RAW_BUCKET_NAME = "raw-youtube-twoset"
