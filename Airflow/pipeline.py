@@ -90,8 +90,9 @@ with DAG(
     load_parquet = GCSToBigQueryOperator(
         task_id = "load_parquet",
         bucket = PROCESSED_BUCKET_NAME,
-        source_objects = ["/result_youtube_parquet.parquet"],
+        source_objects = ["result_youtube_parquet.parquet/*.parquet"],
         destination_project_dataset_table = f"{DATASET_NAME}.{TABLE_NAME}",
+        source_format = "parquet",
         write_disposition = "WRITE_APPEND",
     )
 
