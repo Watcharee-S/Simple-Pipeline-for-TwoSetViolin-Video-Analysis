@@ -1,10 +1,11 @@
-from airflow import DAG
-from airflow.operators.bash import BashOperator
+from airflow.models import DAG
+from pathlib import Path
 from airflow.providers.http.operators.http import SimpleHttpOperator
-from airflow.operators.providers.google.cloud.operators.dataproc import (
+from airflow.providers.google.cloud.operators.dataproc import (
     DataprocCreateClusterOperator,
     DataprocDeleteClusterOperator,
-    DataprocSubmitJobOperator)
+    DataprocSubmitJobOperator,
+)
 from airflow.models import Variable
 from airflow.utils.dates import days_ago
 from airflow.utils.trigger_rule import TriggerRule
@@ -16,7 +17,7 @@ ZONE = "us-central1-a"
 CLUSTER_NAME = "pyspark-simple-de"
 PROJECT_ID = Variable.get("project_id")
 RAW_BUCKET_NAME = "raw-youtube-twoset"
-PYSPARK_FILE = "transform_data_2.py"
+PYSPARK_FILE = "transform_data_to_parquet.py"
 PROCESSED_BUCKET_NAME = "processed-youtube-twoset"
 DATASET_NAME = "youtube_data"
 TABLE_NAME = "video_data_final"
@@ -32,12 +33,12 @@ def handle_response(response):
 CLUSTER_CONFIG = {
     "master_config": {
         "num_instances" : 1,
-        "machine_type_uri" : "n1-standard-4",
+        "machine_type_uri" : "n1-standard-2",
         "disk_config" : {"boot_disk_type": "pd-standard", "boot_disk_size_gb": 1024},
     },
     "worker_config": {
-        "num_instances" : 1,
-        "machine_type_uri" : "n1-standard-4",
+        "num_instances" : 2,
+        "machine_type_uri" : "n1-standard-2",
         "disk_config" : {"boot_disk_type": "pd-standard", "boot_disk_size_gb": 1024},
     },
 }
@@ -50,7 +51,7 @@ PYSPARK_JOB = {
 
 with DAG(
     "simple-de-project",
-    start_date = days_ago(1)
+    start_date = days_ago(1),
     schedule_interval = "@once",
     tags = ["de-project", "TwoSetViolin"]
 ) as dag:
@@ -61,11 +62,6 @@ with DAG(
         http_conn_id = "http_trigger",
         endpoint = Variable.get("http_trigger_endpoint"),
         response_filter = lambda response: handle_response(response),
-    )
-
-    upload_pyspark = BashOperator(
-        task_id = "upload_pyspark",
-        bash_command = f"gsutil cp {PYSPARK_FILE} gs://{RAW_BUCKET_NAME}"
     )
 
     create_cluster = DataprocCreateClusterOperator(
@@ -84,7 +80,7 @@ with DAG(
     )
 
     delete_cluster = DataprocDeleteClusterOperator(
-        task_id = "create_cluster",
+        task_id = "delete_cluster",
         project_id = PROJECT_ID,
         cluster_name = CLUSTER_NAME,
         region = REGION,
@@ -99,10 +95,6 @@ with DAG(
         write_disposition = "WRITE_APPEND",
     )
 
-    [trigger_http, upload_pyspark]
-    >> create_cluster
-    >> pyspark_task
-    >> load_parquet
-    >> delete_cluster
+    trigger_http >> create_cluster >> pyspark_task >> load_parquet >> delete_cluster
 
 
