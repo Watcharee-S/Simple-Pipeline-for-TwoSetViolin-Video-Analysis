@@ -22,5 +22,6 @@ In each folder contains code which needs to run with each google cloud products
 - [Airflow - Dataproc Operator (Pyspark)](https://airflow.apache.org/docs/apache-airflow-providers-google/stable/_modules/tests/system/providers/google/cloud/dataproc/example_dataproc_pyspark.html)
 - [Airflow - GCS to BigQuery Operator](https://airflow.apache.org/docs/apache-airflow-providers-google/stable/operators/cloud/gcs.html#howto-operator-gcstobigqueryoperator)
 - [Airflow - Managing Variables](https://airflow.apache.org/docs/apache-airflow/stable/howto/variable.html)
-- [Airflow - Simple HTTP Operator](https://airflow.apache.org/docs/apache-airflow-providers-http/stable/operators.htm)
+- [Airflow - HTTP Operator Example](https://dzone.com/articles/simplehttpoperator-in-apache-airflow)
+- [Airflow - HTTP Operator Documentation](https://airflow.apache.org/docs/apache-airflow-providers-http/stable/operators.html)
 - [Airflow - Trigger Rule](https://airflow.apache.org/docs/apache-airflow/1.10.5/concepts.html?highlight=trigger%20rule#)
