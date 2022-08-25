@@ -1,4 +1,4 @@
-# simple-de-project
+# Simple-Pipeline-for-TwoSetViolin-Video-Analysis
 Building a simple pipeline to extract youtube video data from TwoSetViolin Channel via Youtube API. Then, transforming data using DataProc and loading data to data warehouse which is Google BigQuery.
 ## Technologies Used
 - Cloud Function --> Extract data from Youtube
